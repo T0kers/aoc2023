@@ -1,5 +1,4 @@
 
-//use std::env;
 use std::fs;
 
 pub fn part1() {
@@ -24,6 +23,93 @@ pub fn part1() {
             }
         }
         sum += start_digit.to_digit(10).unwrap_or(0) * 10 + end_digit.to_digit(10).unwrap_or(0);
+    }
+    println!("The answer is: {}", sum);
+}
+
+fn check_number(text: &str, index: usize, num: &str) -> bool {
+    if text.len() > index && text.len() >= index + num.len() {
+        text.as_bytes()[index..(index + num.len())] == num.as_bytes()[..]
+    }
+    else {
+        false
+    }
+}
+
+pub fn part2() {
+    let contents = fs::read_to_string("input/day1.txt").expect("Error while reading file.");
+    let lowercase = contents.to_lowercase();
+    let lines = lowercase.split('\n');
+
+    let mut digit;
+    let mut start_digit;
+    let mut end_digit;
+    let mut sum = 0;
+    let mut char_index;
+
+    for line in lines {
+        char_index = 0;
+        digit = None;
+        start_digit = None;
+        end_digit = None;
+        while char_index < line.chars().count() {
+            match line.as_bytes()[char_index] {
+                b'o' => {
+                    if check_number(line, char_index, "one") {
+                        digit = Some(1);
+                    }
+                }
+                b't' => {
+                    if check_number(line, char_index, "two") {
+                        digit = Some(2);
+                    }
+                    else if check_number(line, char_index, "three") {
+                        digit = Some(3);
+                    }
+                }
+                b'f' => {
+                    if check_number(line, char_index, "four") {
+                        digit = Some(4);
+                    }
+                    else if check_number(line, char_index, "five") {
+                        digit = Some(5);
+                    }
+                }
+                b's' => {
+                    if check_number(line, char_index, "six") {
+                        digit = Some(6);
+                    }
+                    else if check_number(line, char_index, "seven") {
+                        digit = Some(7);
+                    }
+                }
+                b'e' => {
+                    if check_number(line, char_index, "eight") {
+                        digit = Some(8);
+                    }
+                }
+                b'n' => {
+                    if check_number(line, char_index, "nine") {
+                        digit = Some(9);
+                    }
+                }
+                n if (b'1'..=b'9').contains(&n) => {
+                    digit = (n as char).to_digit(10);
+                }
+                _ => {}
+            }
+            char_index += 1;
+            if digit.is_some() {
+                if start_digit.is_none() {
+                    start_digit = digit;
+                    end_digit = digit;
+                }
+                else {
+                    end_digit = digit;
+                }
+            }
+        }
+        sum += start_digit.unwrap_or(0) * 10 + end_digit.unwrap_or(0);
     }
     println!("The answer is: {}", sum);
 }
