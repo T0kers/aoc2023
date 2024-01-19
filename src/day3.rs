@@ -8,6 +8,15 @@ enum Part {
     Empty,
 }
 
+fn getPart(i: usize, j: usize, eng: &Vec<Vec<Part>>) -> Option<&Part> {
+    if eng.len() > i && eng[i].len() > j {
+        Some(&eng[i][j])
+    }
+    else {
+        None
+    }
+}
+
 pub fn parts() {
     let contents = fs::read_to_string("input/day3.txt").expect("Error while reading file.");
     let lines = contents.split('\n');
@@ -26,9 +35,15 @@ pub fn parts() {
             })
         }
     }
-    for row in engine {
-        for part in row {
-
+    for (i, row) in engine.iter().enumerate() {
+        for (j, part) in row.iter().enumerate() {
+            'check: for i_check in i-1..=i+1 {
+                for j_check in j-1..=j+1 {
+                    if let Some(Part::Number(n)) = getPart(i_check, j_check, &engine) {
+                        
+                    }
+                }
+            }
         }
     }
     println!("{:#?}", engine);
