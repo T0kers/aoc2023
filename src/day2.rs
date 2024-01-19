@@ -14,7 +14,7 @@ pub fn parts() {
     
     let mut seen_colon;
     let mut goto_next = false;
-    let mut num: u32 = 0;
+    let mut num: u32;
     let mut game;
 
     let mut part1: u32 = 0;
