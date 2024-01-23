@@ -24,7 +24,7 @@ pub fn parts() {
     let mut engine = vec![];
 
     for (row, line) in lines.enumerate() {
-        if line == "" {continue;}
+        if line.is_empty() {continue;}
         engine.push(Vec::new());
         for char in line.chars() {
             engine[row].push({
@@ -105,16 +105,10 @@ pub fn parts() {
                                     }
                                 }
                                 num_value = 0;
-                                loop {
-                                    if let Some(Part::Number(n)) = get_part(i_check, num_finder, &engine) {
-                                        num_value = num_value * 10 + *n as u32;
-                                        num_finder += 1;
-                                    }
-                                    else {
-                                        break;
-                                    }
+                                while let Some(Part::Number(n)) = get_part(i_check, num_finder, &engine) {
+                                    num_value = num_value * 10 + *n as u32;
+                                    num_finder += 1;
                                 }
-                                println!("{}", num_value);
                                 gear_ratio *= num_value;
                             }
                         }

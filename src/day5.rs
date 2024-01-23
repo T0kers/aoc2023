@@ -1,5 +1,5 @@
 
-use std::fs;
+use std::{fs, vec};
 
 #[derive(Debug)]
 struct AlmanacRange {
@@ -9,9 +9,6 @@ struct AlmanacRange {
 }
 
 impl AlmanacRange {
-    fn dest_end(&self) -> u64 {
-        self.dest_start + self.range
-    }
     fn source_end(&self) -> u64 {
         self.source_start + self.range
     }
@@ -31,15 +28,53 @@ impl Range {
         }
     }
 
-    // fn from_end(start: u64, end: u64) -> Range {
-    //     Range {
-    //         start,
-    //         range: end - start,
-    //     }
-    // }
+    fn from_end(start: u64, end: u64) -> Range {
+        Range {
+            start,
+            range: end - start,
+        }
+    }
 
     fn end(&self) -> u64 {
         self.start + self.range
+    }
+}
+
+
+fn eval_rule(ranges_left: &mut Vec<Range>, rule: &AlmanacRange, new_ranges: &mut Vec<Range>) {
+    let mut extra_ranges = vec![];
+    for range_left in &mut *ranges_left {
+        if range_left.range == 0 {continue;}
+        if rule.source_start <= range_left.start {
+            if range_left.end() <= rule.source_end() {
+                new_ranges.push(Range::new((range_left.start - rule.source_start) + rule.dest_start, range_left.range));
+                range_left.range = 0;
+                continue;
+            }
+            else if rule.source_end() > range_left.start {
+                new_ranges.push(Range::new((range_left.start - rule.source_start) + rule.dest_start, rule.source_end() - range_left.start));
+                range_left.range -= rule.source_end() - range_left.start;
+                range_left.start = rule.source_end();
+            }
+        }
+        else if rule.source_start < range_left.end() {
+            if range_left.end() <= rule.source_end() {
+                new_ranges.push(Range::new(rule.dest_start, rule.source_start - range_left.start));
+                range_left.range = rule.source_start - range_left.start;
+            }
+            else {
+                new_ranges.push(Range::new(rule.dest_start, rule.range));
+
+                extra_ranges.push(Range::from_end(rule.source_end(), range_left.end()));
+
+                range_left.range = rule.source_start - range_left.start;
+
+            }
+        }
+    }
+    if !extra_ranges.is_empty() {
+        eval_rule(&mut extra_ranges, rule, new_ranges);
+        ranges_left.append(&mut extra_ranges);
     }
 }
 
@@ -49,14 +84,13 @@ pub fn parts() {
     let mut maps = contents.split("\n\n");
 
     let seeds = maps.next().unwrap()[7..].trim().split(' ').flat_map(str::parse::<u64>).collect::<Vec<u64>>();
-    println!("{:?}", seeds);
     
     let mut almanac: Vec<Vec<AlmanacRange>> = vec![];
     
     for (i, map) in maps.enumerate() {
         almanac.push(vec![]);
         for line in map.split('\n').skip(1) {
-            if line == "" {continue;}
+            if line.is_empty() {continue;}
             almanac[i].push({
                 let line_nums: Vec<u64> = line.trim().split(' ').flat_map(str::parse::<u64>).collect::<Vec<u64>>();
                 if line_nums.len() == 3 {
@@ -102,56 +136,24 @@ pub fn parts() {
     let mut new_ranges: Vec<Range> = vec![];
 
     for map in &almanac {
-        let mut ranges_left: Vec<Range> = vec![];
+        let mut ranges_left: Vec<Range>;
         for range in &ranges {
             ranges_left = vec![range.clone()];
-            for line in map {
-                let mut ranges_to_be_added_to_ranges_left = vec![];
-                for range_left in &mut ranges_left {
-                    if range_left.range == 0 {continue;}
-                    if line.source_start <= range_left.start {
-                        if range_left.end() <= line.source_end() {
-                            new_ranges.push(Range::new((range_left.start - line.source_start) + line.dest_start, range_left.range));
-                            range_left.range = 0;
-                            continue;
-                        }
-                        else if line.source_end() > range_left.start {
-                            new_ranges.push(Range::new((range_left.start - line.source_start) + line.dest_start, line.source_end() - range_left.start));
-                            range_left.start = line.source_end();
-                            range_left.range = line.source_end() - range_left.start;
-                        }
-                    }
-                    else if line.source_start < range_left.end() {
-                        if range_left.end() <= line.source_end() {
-                            new_ranges.push(Range::new(line.dest_start, range_left.end() - line.source_start));
-                            range_left.range = line.source_start - range_left.start;
-                        }
-                        else {
-                            new_ranges.push(Range::new(line.dest_start, line.range));
-
-                            ranges_to_be_added_to_ranges_left.push(Range::new(line.source_end(), range_left.end()));
-
-                            range_left.range = line.source_start - range_left.start;
-
-                        }
-                    }
-                }
-                ranges_left.append(&mut ranges_to_be_added_to_ranges_left);
+            for rule in map {
+                eval_rule(&mut ranges_left, rule, &mut new_ranges);
             }
+            new_ranges.append(&mut ranges_left);
         }
         ranges.clear();
         ranges.append(&mut new_ranges);
-        ranges.append(&mut ranges_left);
     }
 
     let mut lowest_part2: u64 = u64::MAX;
     for range in &ranges {
-        println!("{:?}", range);
-        if range.range != 0 && range.start < lowest_part2  {
+        if range.range != 0 && range.start != 0 && range.start < lowest_part2  {
             lowest_part2 = range.start;
         }
     }
-
 
     println!("Results: {} {}", lowest_part1, lowest_part2);
 

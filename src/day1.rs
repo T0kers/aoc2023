@@ -1,7 +1,11 @@
 
 use std::fs;
 
-pub fn part1() {
+pub fn parts() {
+    println!("Results: {} {}", part1(), part2());
+}
+
+fn part1() -> u32 {
     let contents = fs::read_to_string("input/day1.txt").expect("Error while reading file.");
     let lines = contents.split('\n');
 
@@ -24,7 +28,7 @@ pub fn part1() {
         }
         sum += start_digit.to_digit(10).unwrap_or(0) * 10 + end_digit.to_digit(10).unwrap_or(0);
     }
-    println!("The answer is: {}", sum);
+    sum
 }
 
 fn check_number(text: &str, index: usize, num: &str) -> bool {
@@ -36,7 +40,7 @@ fn check_number(text: &str, index: usize, num: &str) -> bool {
     }
 }
 
-pub fn part2() {
+fn part2() -> u32 {
     let contents = fs::read_to_string("input/day1.txt").expect("Error while reading file.");
     let lowercase = contents.to_lowercase();
     let lines = lowercase.split('\n');
@@ -111,5 +115,5 @@ pub fn part2() {
         }
         sum += start_digit.unwrap_or(0) * 10 + end_digit.unwrap_or(0);
     }
-    println!("The answer is: {}", sum);
+    sum
 }

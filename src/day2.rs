@@ -21,7 +21,7 @@ pub fn parts() {
     let mut part2: u32 = 0;
     let mut id: u32 = 1;
     for  line in lines {
-        if line == "" {continue;}
+        if line.is_empty() {continue;}
         seen_colon = false;
         game = GameInfo {r: 0, g: 0, b: 0};
         num = 0;
@@ -69,5 +69,5 @@ pub fn parts() {
         part2 += game.r * game.g * game.b;
         id += 1;
     }
-    println!("Result: {}, {}", part1, part2);
+    println!("Results: {} {}", part1, part2);
 }

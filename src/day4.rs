@@ -19,11 +19,11 @@ pub fn parts() {
     let mut all_matches: Vec<MatchInfo> = vec![];
 
     for (line_index, line) in lines.enumerate() {
-        if line == "" {continue;}
+        if line.is_empty() {continue;}
         iter = line.chars().skip(8);
         winning = vec![];
         current_number = 0;
-        while let Some(ch) = iter.next() {
+        for ch in iter.by_ref() {
             if ch == ' ' && current_number != 0 {
                 winning.push(current_number);
                 current_number = 0;
@@ -37,7 +37,7 @@ pub fn parts() {
             }
         }
         matches = 0;
-        while let Some(ch) = iter.next() {
+        for ch in iter.by_ref() {
             if ch == ' ' && current_number != 0 {
                 if winning.contains(&current_number) {
                     matches += 1;
